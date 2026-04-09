@@ -16,12 +16,21 @@
       "./node_modules/@types"
     ],
     "paths": {
+      "discord.js": ["node_modules/.pnpm/discord.js@14.26.2/node_modules/discord.js"],
+      "discord-api-types/v10": ["node_modules/.pnpm/discord-api-types@0.38.44/node_modules/discord-api-types/v10.d.ts"],
+      "discord-api-types/*": ["node_modules/.pnpm/discord-api-types@0.38.44/node_modules/discord-api-types/*"],
+      "@discordjs/builders": ["node_modules/.pnpm/@discordjs+builders@1.14.1/node_modules/@discordjs/builders"],
+      "@discordjs/rest": ["node_modules/.pnpm/@discordjs+rest@2.6.1/node_modules/@discordjs/rest"],
+      "@discordjs/ws": ["node_modules/.pnpm/@discordjs+ws@1.2.3/node_modules/@discordjs/ws"],
+      "@discordjs/formatters": ["node_modules/.pnpm/@discordjs+formatters@0.6.2/node_modules/@discordjs/formatters"],
+      "@discordjs/util": ["node_modules/.pnpm/@discordjs+util@1.2.0/node_modules/@discordjs/util"],
+      "@discordjs/collection": ["node_modules/.pnpm/@discordjs+collection@1.5.3/node_modules/@discordjs/collection"],
       "@anthropic-ai/sdk": ["node_modules/.pnpm/@anthropic-ai+sdk@0.82.0/node_modules/@anthropic-ai/sdk"],
       "@anthropic-ai/sdk/*": ["node_modules/.pnpm/@anthropic-ai+sdk@0.82.0/node_modules/@anthropic-ai/sdk/*"],
       "openai": ["node_modules/.pnpm/openai@6.33.0_ws@8.20.0/node_modules/openai"],
       "openai/*": ["node_modules/.pnpm/openai@6.33.0_ws@8.20.0/node_modules/openai/*"],
       "@google/generative-ai": ["node_modules/.pnpm/@google+generative-ai@0.24.1/node_modules/@google/generative-ai"],
-      "@google/generative-ai/*": ["node_modules/.pnpm/@google+generative-ai@0.24.1/node_modules/@google/generative-ai/*"]
+      "dotenv/config": ["node_modules/.pnpm/dotenv@17.4.1/node_modules/dotenv/config.d.ts"]
     }
   },
   "include": ["src/**/*"]

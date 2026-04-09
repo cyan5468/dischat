@@ -63,6 +63,19 @@ export class DiscordBot {
         .setName('clear')
         .setDescription('このチャンネルの会話履歴をクリアする')
         .toJSON(),
+      new SlashCommandBuilder()
+        .setName('autoreply')
+        .setDescription('メンション不要で自動返答するチャンネルを管理する')
+        .addSubcommand((sub) =>
+          sub.setName('add').setDescription('このチャンネルを自動返答対象に追加する'),
+        )
+        .addSubcommand((sub) =>
+          sub.setName('remove').setDescription('このチャンネルを自動返答対象から外す'),
+        )
+        .addSubcommand((sub) =>
+          sub.setName('list').setDescription('自動返答対象のチャンネル一覧を表示する'),
+        )
+        .toJSON(),
     ]
 
     const rest = new REST().setToken(process.env.DISCORD_TOKEN!)
@@ -154,6 +167,38 @@ export class DiscordBot {
         content: '🗑️ 会話履歴をクリアしました！',
         ephemeral: true,
       })
+    }
+
+    if (interaction.commandName === 'autoreply') {
+      const sub = interaction.options.getSubcommand()
+      const channelId = interaction.channelId
+
+      if (sub === 'add') {
+        if (this.config.autoReplyChannels.has(channelId)) {
+          await interaction.reply({ content: 'このチャンネルはすでに自動返答対象です。', ephemeral: true })
+        } else {
+          this.config.autoReplyChannels.add(channelId)
+          await interaction.reply({ content: `✅ <#${channelId}> を自動返答対象に追加しました。`, ephemeral: true })
+        }
+      }
+
+      if (sub === 'remove') {
+        if (!this.config.autoReplyChannels.has(channelId)) {
+          await interaction.reply({ content: 'このチャンネルは自動返答対象ではありません。', ephemeral: true })
+        } else {
+          this.config.autoReplyChannels.delete(channelId)
+          await interaction.reply({ content: `🗑️ <#${channelId}> を自動返答対象から外しました。`, ephemeral: true })
+        }
+      }
+
+      if (sub === 'list') {
+        if (this.config.autoReplyChannels.size === 0) {
+          await interaction.reply({ content: '自動返答対象のチャンネルはありません。', ephemeral: true })
+        } else {
+          const list = [...this.config.autoReplyChannels].map((id) => `<#${id}>`).join('\n')
+          await interaction.reply({ content: `📋 自動返答対象チャンネル:\n${list}`, ephemeral: true })
+        }
+      }
     }
   }
 
