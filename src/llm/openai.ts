@@ -11,7 +11,7 @@ export class OpenAIProvider implements LLMProvider {
 
   async chat(messages: Message[], systemPrompt: string): Promise<string> {
     const res = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.4-nano',
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages,

@@ -11,7 +11,7 @@ export class GeminiProvider implements LLMProvider {
 
   async chat(messages: Message[], systemPrompt: string): Promise<string> {
     const model = this.genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
     })
 

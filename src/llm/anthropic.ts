@@ -11,7 +11,7 @@ export class AnthropicProvider implements LLMProvider {
 
   async chat(messages: Message[], systemPrompt: string): Promise<string> {
     const res = await this.client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-haiku-4-5',
       max_tokens: 1024,
       system: systemPrompt,
       messages,
