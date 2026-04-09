@@ -1,19 +1,17 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI } from '@google/genai'
 import { LLMProvider, Message } from './base'
 
 export class GeminiProvider implements LLMProvider {
   readonly name = 'gemini'
-  private genAI: GoogleGenerativeAI
+  private client: GoogleGenAI
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
+    this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? '' })
   }
 
   async chat(messages: Message[], systemPrompt: string): Promise<string> {
-    const model = this.genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction: systemPrompt,
-    })
+    const lastMessage = messages[messages.length - 1]
+    if (!lastMessage) return ''
 
     // Gemini は history と最後のメッセージを分ける必要がある
     const history = messages.slice(0, -1).map((m) => ({
@@ -21,11 +19,15 @@ export class GeminiProvider implements LLMProvider {
       parts: [{ text: m.content }],
     }))
 
-    const lastMessage = messages[messages.length - 1]
-    if (!lastMessage) return ''
+    const chat = this.client.chats.create({
+      model: 'gemini-3.1-flash-lite-preview',
+      config: {
+        systemInstruction: systemPrompt,
+      },
+      history,
+    })
 
-    const chat = model.startChat({ history })
-    const result = await chat.sendMessage(lastMessage.content)
-    return result.response.text()
+    const response = await chat.sendMessage({ message: lastMessage.content })
+    return response.text ?? ''
   }
 }
