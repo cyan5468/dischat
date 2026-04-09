@@ -2,10 +2,27 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/.pnpm/@types+node@25.5.2/node_modules/@types",
+      "./node_modules/@types"
+    ],
+    "paths": {
+      "@anthropic-ai/sdk": ["node_modules/.pnpm/@anthropic-ai+sdk@0.82.0/node_modules/@anthropic-ai/sdk"],
+      "@anthropic-ai/sdk/*": ["node_modules/.pnpm/@anthropic-ai+sdk@0.82.0/node_modules/@anthropic-ai/sdk/*"],
+      "openai": ["node_modules/.pnpm/openai@6.33.0_ws@8.20.0/node_modules/openai"],
+      "openai/*": ["node_modules/.pnpm/openai@6.33.0_ws@8.20.0/node_modules/openai/*"],
+      "@google/generative-ai": ["node_modules/.pnpm/@google+generative-ai@0.24.1/node_modules/@google/generative-ai"],
+      "@google/generative-ai/*": ["node_modules/.pnpm/@google+generative-ai@0.24.1/node_modules/@google/generative-ai/*"]
+    }
+  },
+  "include": ["src/**/*"]
 }
