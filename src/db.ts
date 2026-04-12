@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const Database = require('better-sqlite3') as typeof import('better-sqlite3')
 import type BetterSqlite3 from 'better-sqlite3'
+import fs from 'fs'
 import path from 'path'
 
 export interface UserProfile {
@@ -24,6 +25,7 @@ let _db: BetterSqlite3.Database | null = null
 
 export function getDb(): BetterSqlite3.Database {
   if (!_db) {
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true })
     _db = new Database(DB_PATH) as BetterSqlite3.Database
     _db.pragma('journal_mode = WAL')
     initTables(_db)
