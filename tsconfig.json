@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "typeRoots": [
       "./node_modules/.pnpm/@types+node@25.5.2/node_modules/@types",
+      "./node_modules/.pnpm/@types+better-sqlite3@7.6.13/node_modules/@types",
       "./node_modules/@types",
     ],
     "paths": {
@@ -52,8 +53,17 @@
       "openai/*": [
         "./node_modules/.pnpm/openai@6.33.0_ws@8.20.0/node_modules/openai/*",
       ],
+      "better-sqlite3": [
+        "./node_modules/.pnpm/@types+better-sqlite3@7.6.13/node_modules/@types/better-sqlite3",
+      ],
       "@google/generative-ai": [
         "./node_modules/.pnpm/@google+generative-ai@0.24.1/node_modules/@google/generative-ai",
+      ],
+      "@google/genai": [
+        "./node_modules/.pnpm/@google+genai@1.49.0/node_modules/@google/genai",
+      ],
+      "@google/genai/*": [
+        "./node_modules/.pnpm/@google+genai@1.49.0/node_modules/@google/genai/*",
       ],
       "dotenv/config": [
         "./node_modules/.pnpm/dotenv@17.4.1/node_modules/dotenv/config.d.ts",

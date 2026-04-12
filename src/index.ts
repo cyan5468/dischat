@@ -1,22 +1,11 @@
 import 'dotenv/config'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 import { DiscordBot } from './bot'
-import { AnthropicProvider } from './llm/anthropic'
+import { CharacterManager, loadCharacter } from './character'
+import { getDb } from './db'
 import { OpenAIProvider } from './llm/openai'
+import { AnthropicProvider } from './llm/anthropic'
 import { GeminiProvider } from './llm/gemini'
 import { LLMProvider } from './llm/base'
-
-interface Character {
-  name: string
-  systemPrompt: string
-}
-
-function loadCharacter(name = 'default'): Character {
-  const path = join(process.cwd(), 'characters', `${name}.json`)
-  const raw = readFileSync(path, 'utf-8')
-  return JSON.parse(raw) as Character
-}
 
 function createProvider(name: string): LLMProvider {
   switch (name.toLowerCase()) {
@@ -35,12 +24,17 @@ async function main(): Promise<void> {
   const token = process.env.DISCORD_TOKEN
   if (!token) throw new Error('DISCORD_TOKEN is not set')
 
+  // DB 初期化（テーブル作成）
+  getDb()
+  console.log('✅ Database initialized')
+
   const providerName = process.env.DEFAULT_PROVIDER ?? 'anthropic'
   const provider = createProvider(providerName)
   console.log(`🤖 Provider: ${providerName}`)
 
-  const character = loadCharacter()
-  console.log(`🎭 Character: ${character.name}`)
+  const defaultCharacter = loadCharacter('default')
+  const characterManager = new CharacterManager(defaultCharacter)
+  console.log(`🎭 Default character: ${defaultCharacter.name}`)
 
   const autoReplyChannels = new Set(
     (process.env.AUTO_REPLY_CHANNELS ?? '')
@@ -55,7 +49,7 @@ async function main(): Promise<void> {
 
   const bot = new DiscordBot({
     provider,
-    systemPrompt: character.systemPrompt,
+    characterManager,
     autoReplyChannels,
   })
 
