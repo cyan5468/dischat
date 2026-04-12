@@ -8,6 +8,9 @@
     "build": "tsc && pnpm rebuild better-sqlite3",
     "start": "node dist/index.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [],
   "author": "",
   "license": "MIT",
