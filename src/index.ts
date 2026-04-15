@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { DiscordBot } from './bot'
 import { CharacterManager, loadCharacter } from './character'
-import { getDb } from './db'
+import { getDb, setAutoReply } from './db'
 import { OpenAIProvider } from './llm/openai'
 import { AnthropicProvider } from './llm/anthropic'
 import { GeminiProvider } from './llm/gemini'
@@ -36,21 +36,23 @@ async function main(): Promise<void> {
   const characterManager = new CharacterManager(defaultCharacter)
   console.log(`🎭 Default character: ${defaultCharacter.name}`)
 
-  const autoReplyChannels = new Set(
-    (process.env.AUTO_REPLY_CHANNELS ?? '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean),
-  )
+  // AUTO_REPLY_CHANNELS 環境変数からDBへシード（初回起動時や変更時に反映）
+  const seedChannels = (process.env.AUTO_REPLY_CHANNELS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
-  if (autoReplyChannels.size > 0) {
-    console.log(`📢 Auto-reply channels: ${[...autoReplyChannels].join(', ')}`)
+  for (const channelId of seedChannels) {
+    setAutoReply(channelId, true)
+  }
+
+  if (seedChannels.length > 0) {
+    console.log(`📢 Auto-reply channels seeded: ${seedChannels.join(', ')}`)
   }
 
   const bot = new DiscordBot({
     provider,
     characterManager,
-    autoReplyChannels,
   })
 
   await bot.login(token)

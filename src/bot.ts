@@ -16,8 +16,10 @@ import {
   addMessage,
   clearChannelHistory,
   deleteUserData,
+  getAutoReplyChannels,
   getHistory,
   getProfile,
+  setAutoReply,
   upsertProfile,
 } from './db'
 import { appendMemo, maybeConsolidateMemo } from './profile'
@@ -28,7 +30,6 @@ const DISCORD_MAX_LENGTH = 2000
 export interface BotConfig {
   provider: LLMProvider
   characterManager: CharacterManager
-  autoReplyChannels: Set<string>
 }
 
 export class DiscordBot {
@@ -136,7 +137,7 @@ ${memo}
     if (msg.author.bot) return
 
     const isDM = msg.channel.type === ChannelType.DM
-    const isAutoReply = this.config.autoReplyChannels.has(msg.channelId)
+    const isAutoReply = getAutoReplyChannels().has(msg.channelId)
     const isMentioned = this.client.user
       ? msg.mentions.users.has(this.client.user.id)
       : false
@@ -228,39 +229,42 @@ ${memo}
       const sub = interaction.options.getSubcommand()
 
       if (sub === 'add') {
-        if (this.config.autoReplyChannels.has(channelId)) {
+        const autoReplyChannels = getAutoReplyChannels()
+        if (autoReplyChannels.has(channelId)) {
           await interaction.reply({
             content: 'このチャンネルはすでに自動返答対象です。',
             ephemeral: true,
           })
         } else {
-          this.config.autoReplyChannels.add(channelId)
+          setAutoReply(channelId, true)
           await interaction.reply({
             content: `✅ <#${channelId}> を自動返答対象に追加しました。`,
             ephemeral: true,
           })
         }
       } else if (sub === 'remove') {
-        if (!this.config.autoReplyChannels.has(channelId)) {
+        const autoReplyChannels = getAutoReplyChannels()
+        if (!autoReplyChannels.has(channelId)) {
           await interaction.reply({
             content: 'このチャンネルは自動返答対象ではありません。',
             ephemeral: true,
           })
         } else {
-          this.config.autoReplyChannels.delete(channelId)
+          setAutoReply(channelId, false)
           await interaction.reply({
             content: `🗑️ <#${channelId}> を自動返答対象から外しました。`,
             ephemeral: true,
           })
         }
       } else if (sub === 'list') {
-        if (this.config.autoReplyChannels.size === 0) {
+        const autoReplyChannels = getAutoReplyChannels()
+        if (autoReplyChannels.size === 0) {
           await interaction.reply({
             content: '自動返答対象のチャンネルはありません。',
             ephemeral: true,
           })
         } else {
-          const list = [...this.config.autoReplyChannels].map((id) => `<#${id}>`).join('\n')
+          const list = [...autoReplyChannels].map((id) => `<#${id}>`).join('\n')
           await interaction.reply({
             content: `📋 自動返答対象チャンネル:\n${list}`,
             ephemeral: true,

@@ -25,7 +25,11 @@ let _db: BetterSqlite3.Database | null = null
 
 export function getDb(): BetterSqlite3.Database {
   if (!_db) {
-    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true })
+    // 親ディレクトリが存在しない場合は作成
+    const dir = path.dirname(DB_PATH)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
     _db = new Database(DB_PATH) as BetterSqlite3.Database
     _db.pragma('journal_mode = WAL')
     initTables(_db)
@@ -51,10 +55,18 @@ function initTables(db: BetterSqlite3.Database): void {
       timestamp  TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS channel_settings (
+      channel_id     TEXT PRIMARY KEY,
+      auto_reply     INTEGER NOT NULL DEFAULT 0,
+      character_name TEXT
+    );
+
     CREATE INDEX IF NOT EXISTS idx_history_channel ON conversation_history(channel_id, id);
     CREATE INDEX IF NOT EXISTS idx_history_user_channel ON conversation_history(user_id, channel_id);
   `)
 }
+
+// --- UserProfile ---
 
 export function getProfile(userId: string): UserProfile | null {
   const db = getDb()
@@ -83,6 +95,8 @@ export function appendMemoToProfile(userId: string, displayName: string, newInfo
   const updated = current ? `${current}\n${newInfo}` : newInfo
   upsertProfile(userId, displayName, updated)
 }
+
+// --- ConversationHistory ---
 
 export function getHistory(channelId: string, limit: number): HistoryRow[] {
   const db = getDb()
@@ -132,4 +146,47 @@ export function getUserTurnCount(userId: string, channelId: string): number {
     `)
     .get(userId, channelId) as { cnt: number }
   return row.cnt
+}
+
+// --- ChannelSettings ---
+
+export function getAutoReplyChannels(): Set<string> {
+  const db = getDb()
+  const rows = db
+    .prepare(`SELECT channel_id FROM channel_settings WHERE auto_reply = 1`)
+    .all() as { channel_id: string }[]
+  return new Set(rows.map((r) => r.channel_id))
+}
+
+export function setAutoReply(channelId: string, enabled: boolean): void {
+  const db = getDb()
+  db.prepare(`
+    INSERT INTO channel_settings (channel_id, auto_reply)
+    VALUES (?, ?)
+    ON CONFLICT(channel_id) DO UPDATE SET auto_reply = excluded.auto_reply
+  `).run(channelId, enabled ? 1 : 0)
+}
+
+export function getChannelCharacter(channelId: string): string | null {
+  const db = getDb()
+  const row = db
+    .prepare(`SELECT character_name FROM channel_settings WHERE channel_id = ?`)
+    .get(channelId) as { character_name: string | null } | undefined
+  return row?.character_name ?? null
+}
+
+export function setChannelCharacter(channelId: string, characterName: string): void {
+  const db = getDb()
+  db.prepare(`
+    INSERT INTO channel_settings (channel_id, character_name)
+    VALUES (?, ?)
+    ON CONFLICT(channel_id) DO UPDATE SET character_name = excluded.character_name
+  `).run(channelId, characterName)
+}
+
+export function clearChannelCharacter(channelId: string): void {
+  const db = getDb()
+  db.prepare(`
+    UPDATE channel_settings SET character_name = NULL WHERE channel_id = ?
+  `).run(channelId)
 }
